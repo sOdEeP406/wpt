@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<script src="/resources/testharness.js"></script>
+<script src="/resources/testharnessreport.js"></script>
+<script src="/common/dispatcher/dispatcher.js"></script>
+<script src="/common/utils.js"></script>
+<script src="resources/utils.sub.js"></script>
+
+<script>
+  promise_test(async t => {
+    assert_implements(HTMLScriptElement.supports('speculationrules'), "Speculation Rules not supported");
+
+    let url = getPrefetchUrlList(1)[0];
+    insertSpeculationRules({ prefetch: [{ source: 'list', urls: [url] }] });
+    await new Promise(resolve => t.step_timeout(resolve, 3000));
+
+    let status = await getPrefetchUrlStatus(url);
+    assert_equals(status["prefetch"], 1, "url should be prefetched");
+    assert_equals(status["cookie"], 1, "cookies should be set by prefetch.");
+
+    status = await getPrefetchUrlStatus(url);
+    assert_equals(status["cookie"], 2, "above fetch should set the cookie again.");
+
+  }, "speculation rules based prefetch should use cookies for same origin urls.");
+</script>

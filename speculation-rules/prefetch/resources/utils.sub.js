@@ -67,13 +67,28 @@ function getPrefetchUrlList(n) {
   return urls;
 }
 
+function getCrossOriginCookiePrefetchUrl() {
+  let params = new URLSearchParams({
+    uuid: token(),
+    origin: SR_PREFETCH_UTILS_URL.origin
+  });
+  let url = new URL(`prefetch.py?${params}`, SR_PREFETCH_UTILS_URL);
+  url.hostname = PREFETCH_PROXY_BYPASS_HOST;
+  return url;
+}
+
 function getRedirectUrl() {
   let params = new URLSearchParams({uuid: token()});
   return new URL(`redirect.py?${params}`, SR_PREFETCH_UTILS_URL);
 }
 
 async function isUrlPrefetched(url) {
-  let response = await fetch(url, {redirect: 'follow'});
+  let json = await getPrefetchUrlStatus(url);
+  return json["prefetch"];
+}
+
+async function getPrefetchUrlStatus(url) {
+  let response = await fetch(url, {redirect: 'follow', credentials:'include'});
   assert_true(response.ok);
   return response.json();
 }

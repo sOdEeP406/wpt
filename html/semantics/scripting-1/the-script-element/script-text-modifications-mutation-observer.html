@@ -1,0 +1,41 @@
+<!doctype html>
+<head>
+<meta charset=utf-8>
+<title>Modify HTMLScriptElement's text after #prepare-a-script that violates CSP using MutationObserver</title>
+<link rel=help href="https://html.spec.whatwg.org/multipage/scripting.html#prepare-a-script">
+<script src="/resources/testharness.js"></script>
+<script src="/resources/testharnessreport.js"></script>
+<meta http-equiv="content-security-policy" content="script-src
+  'nonce-allow'
+  'sha256-3Y6O2OT0e4+wgFgYVvT91oHfNm6D/uTm6vq9kjEtuis='
+">
+
+<script nonce="allow">
+var t = async_test("Modify inline script element's text " +
+                   "after prepare-a-script before evaluation (MutationObserver)");
+
+new MutationObserver(records => records
+  .filter(record => record.target.localName === "script" && record.target.id === 'script0')
+  .flatMap(record => [ ...record.addedNodes ])
+  .forEach(script => {
+      script.textContent = 't.unreached_func("This should not be evaluated")();';
+    })
+).observe(document, {
+  childList: true,
+  characterData: true,
+  subtree: true
+});
+</script>
+
+<script id="script0">
+t.step(() => {
+    var s = document.getElementById('script0');
+    assert_equals(s.innerText,
+                  't.unreached_func("This should not be evaluated")();',
+                  "<script>'s innerText should be already modified");
+    assert_equals(s.text,
+                  't.unreached_func("This should not be evaluated")();',
+                  "<script>'s text should be already modified");
+    t.done();
+  });
+</script>

@@ -4,6 +4,15 @@
 <script src="/common/get-host-info.sub.js"></script>
 <script src="./partitioned-utils.js"></script>
 
+<!-- Guide to functions referenced in this test:
+- service-workers/service-worker/resources/partitioned-utils.js:
+  - setup3pIframe(): registers and maintains a ServiceWorker in
+    the local './partitioned-' scope; not necessarily 3p.
+- service-workers/service-worker/resources/partitioned-storage-sw.js:
+  - partitioned-resolve.fakehtml?FromNestedFrame: this URL makes
+    a "request" to fetchEventHandler() resolve any existing promises
+    from a ServiceWorker.
+-->
 
 <body>
 Innermost 1p iframe (A2) with 3p ancestor (A1-B-A2-A3): this iframe will

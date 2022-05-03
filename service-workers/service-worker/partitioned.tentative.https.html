@@ -7,8 +7,26 @@
 <script src="/common/get-host-info.sub.js"></script>
 <script src="resources/partitioned-utils.js"></script>
 
+<!-- Guide to functions referenced in this test:
+- service-workers/service-worker/resources/partitioned-storage-sw.js:
+  - fetchEventHandler(): watches for URL intercepts with the
+    following options to either create or resolve a promise.
+      - 'waitUntilResolved.fakehtml'
+      - 'resolve.fakehtml'
+- service-workers/service-worker/resources/partitioned-utils.js:
+  - messageEventHandler(): specialized to keep track of pending
+    promises in the main frame.
+  - loadAndReturnSwData(): can specify either an 'iframe' or 'window'
+    type to load the specified URL into; window elements will be
+    loaded as HTTPS_NOTSAMESITE_ORIGIN or 3p by default.
+- service-workers/service-worker/resources/test-helpers.sub.js:
+  - Provides the following helpers for creating test ServiceWorkers:
+    - service_worker_unregister_and_register()
+    - wait_for_state()
+-->
 
 <body>
+  <!-- Debugging text for both test cases -->
   The 3p iframe's postMessage:
   <p id="iframe_response">No message received</p>
 

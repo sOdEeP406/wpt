@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<meta charset=utf-8 />
+<meta name="timeout" content="long">
+<title>Event Timing: interactionId-press-key-no-effect.</title>
+<script src=/resources/testharness.js></script>
+<script src=/resources/testharnessreport.js></script>
+<script src=/resources/testdriver.js></script>
+<script src=/resources/testdriver-actions.js></script>
+<script src=/resources/testdriver-vendor.js></script>
+<script src=resources/event-timing-test-utils.js></script>
+
+<body>
+  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec tempus
+    lacinia nisi, eget tempor orci. Nullam congue pharetra arcu, et consectetur
+    massa mollis tincidunt. Quisque odio sapien, viverra finibus lectus ac,
+    consectetur ornare quam. In hac habitasse platea dictumst. Morbi cursus est
+    odio, non fermentum ligula posuere vitae. Sed ullamcorper convallis rhoncus.
+    In condimentum neque nec metus hendrerit, et cursus ipsum aliquet.
+  </p>
+</body>
+<script>
+  let observedEntries = [];
+  let map = new Map();
+
+  function eventsForCheck(entry) {
+    if (entry.name === 'keydown' || entry.name === 'keyup') {
+      map.set(entry.name, entry.interactionId);
+      return true;
+    }
+    return false;
+  }
+
+  async function press(element, key) {
+    const clickHandler = (e) => {
+      mainThreadBusy(200);
+    };
+
+    element.addEventListener("keydown", clickHandler);
+
+    await test_driver.send_keys(element, key);
+  }
+
+  async_test(function (t) {
+    assert_implements(window.PerformanceEventTiming, 'Event Timing is not supported.');
+
+    new PerformanceObserver(t.step_func(entryList => {
+      observedEntries = observedEntries.concat(entryList.getEntries().filter(eventsForCheck));
+
+      if (observedEntries.length < 2)
+        return;
+
+      assert_greater_than(map.get('keydown'), 0, 'Should have a non-trivial interactionId');
+      assert_greater_than(map.get('keyup'), 0, 'Should have a non-trivial interactionId');
+      assert_equals(map.get('keydown'), map.get('keyup'), 'keyDown and KeyUp should have the same interactionId');
+
+      t.done();
+    })).observe({ type: "event" });
+
+    press(document.body, 't');
+  }, "Event Timing: compare event timing interactionId for key press with no effect.");
+</script>

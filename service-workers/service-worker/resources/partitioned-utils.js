@@ -57,8 +57,9 @@ function loadAndReturnSwData(t, url, frame_type) {
   return message_promise;
 }
 
-// 3p iframe utilities
-async function setup3pIframe() {
+// Registers and maintains a service worker. Used in windows or iframes
+// that will be partitioned from the main frame.
+async function setupServiceWorker() {
 
   const script = './partitioned-storage-sw.js';
   const scope = './partitioned-';
